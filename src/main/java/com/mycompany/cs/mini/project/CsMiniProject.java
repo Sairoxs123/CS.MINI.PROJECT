@@ -3,14 +3,125 @@
  */
 
 package com.mycompany.cs.mini.project;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-/**
- *
- * @author vsais
- */
-public class CsMiniProject {
+public class CsMiniProject extends JFrame {
+    public CsMiniProject() {
+        setTitle("SkillHub - Workshop Management System");
+        setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JMenuBar menuBar = new JMenuBar();
+        JMenu dataEntryMenu = new JMenu("Data Entry");
+        JMenuItem addEmployeeItem = new JMenuItem("Add Employee");
+        JMenuItem addFacilitatorItem = new JMenuItem("Add Facilitator");
+
+        dataEntryMenu.add(addEmployeeItem);
+        dataEntryMenu.add(addFacilitatorItem);
+        menuBar.add(dataEntryMenu);
+        setJMenuBar(menuBar);
+
+        addEmployeeItem.addActionListener(e -> new EmployeePanel());
+        addFacilitatorItem.addActionListener(e -> new FacilitatorPanel());
+    }
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        SwingUtilities.invokeLater(() -> new CsMiniProject().setVisible(true));
+    }
+}
+
+class EmployeePanel extends JFrame {
+    private JTextField nameField, deptField, emailField;
+    private JButton saveButton;
+
+    public EmployeePanel() {
+        setTitle("Add Employee");
+        setSize(400, 250);
+        setLayout(new GridLayout(4, 2));
+        setLocationRelativeTo(null);
+        
+        add(new JLabel("Name:"));
+        nameField = new JTextField();
+        add(nameField);
+
+        add(new JLabel("Department:"));
+        deptField = new JTextField();
+        add(deptField);
+
+        add(new JLabel("Email ID:"));
+        emailField = new JTextField();
+        add(emailField);
+
+        saveButton = new JButton("Save");
+        add(saveButton);
+
+        saveButton.addActionListener(e -> saveEmployee());
+        setVisible(true);
+    }
+
+    private void saveEmployee() {
+        String name = nameField.getText().trim();
+        String dept = deptField.getText().trim();
+        String email = emailField.getText().trim();
+        
+        if (name.isEmpty() || dept.isEmpty() || email.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Call your existing write function here
+        JOptionPane.showMessageDialog(this, "Employee saved successfully!");
+        dispose();
+    }
+}
+
+class FacilitatorPanel extends JFrame {
+    private JTextField nameField, emailField;
+    private JComboBox<String> expertiseBox;
+    private JButton saveButton;
+
+    public FacilitatorPanel() {
+        setTitle("Add Facilitator");
+        setSize(400, 250);
+        setLayout(new GridLayout(4, 2));
+        setLocationRelativeTo(null);
+
+        add(new JLabel("Name:"));
+        nameField = new JTextField();
+        add(nameField);
+
+        add(new JLabel("Expertise Area:"));
+        String[] expertiseOptions = {"Leadership", "Data Analytics", "Communication Skills"};
+        expertiseBox = new JComboBox<>(expertiseOptions);
+        add(expertiseBox);
+
+        add(new JLabel("Email ID:"));
+        emailField = new JTextField();
+        add(emailField);
+
+        saveButton = new JButton("Save");
+        add(saveButton);
+
+        saveButton.addActionListener(e -> saveFacilitator());
+        setVisible(true);
+    }
+
+    private void saveFacilitator() {
+        String name = nameField.getText().trim();
+        String expertise = (String) expertiseBox.getSelectedItem();
+        String email = emailField.getText().trim();
+        
+        if (name.isEmpty() || email.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Call your existing write function here
+        JOptionPane.showMessageDialog(this, "Facilitator saved successfully!");
+        dispose();
     }
 }
