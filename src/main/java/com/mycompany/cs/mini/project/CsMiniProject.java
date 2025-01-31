@@ -7,6 +7,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import org.apache.commons.csv.*;
+import java.io.FileWriter;
+import java.io.IOException;
+
 
 public class CsMiniProject extends JFrame {
     public CsMiniProject() {
@@ -29,6 +33,14 @@ public class CsMiniProject extends JFrame {
         addFacilitatorItem.addActionListener(e -> new FacilitatorPanel());
     }
 
+    public static void appendToCSV(String filePath, String[] data) throws IOException {
+        try (FileWriter fileWriter = new FileWriter(filePath, true); // Append mode (true)
+            CSVPrinter csvPrinter = new CSVPrinter(fileWriter, CSVFormat.DEFAULT)) {
+            csvPrinter.println();
+            csvPrinter.printRecord((Object[]) data); // This already adds a new line
+        }
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new CsMiniProject().setVisible(true));
     }
@@ -46,7 +58,7 @@ class EmployeePanel extends JFrame {
         setSize(400, 250);
         setLayout(new GridLayout(4, 2));
         setLocationRelativeTo(null);
-        
+
         add(new JLabel("Name:"));
         nameField = new JTextField();
         add(nameField);
@@ -70,15 +82,23 @@ class EmployeePanel extends JFrame {
         String name = nameField.getText().trim();
         String dept = deptField.getText().trim();
         String email = emailField.getText().trim();
-        
+
         if (name.isEmpty() || dept.isEmpty() || email.isEmpty()) {
             JOptionPane.showMessageDialog(this, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
+
+        String[] data = {name, dept, email};
+        try {
+            CsMiniProject.appendToCSV("employees.csv", data);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "An error occurred while saving the employee!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         // Put read/write func here teju
         JOptionPane.showMessageDialog(this, "Employee saved successfully!");
-        dispose();
+        //dispose();
     }
 }
 
@@ -117,14 +137,23 @@ class FacilitatorPanel extends JFrame {
     private void saveFacilitator() {
         String name = nameField.getText().trim();
         String email = emailField.getText().trim();
-        
+        String expertise = (String) expertiseBox.getSelectedItem();
+
         if (name.isEmpty() || email.isEmpty()) {
             JOptionPane.showMessageDialog(this, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
+
+        String[] data = {name, expertise, email};
+        try {
+            CsMiniProject.appendToCSV("facilitators.csv", data);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "An error occurred while saving the facilitator!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         // Put read/write function here teju
         JOptionPane.showMessageDialog(this, "Facilitator saved successfully!");
-        dispose();
+        //dispose();
     }
 }
