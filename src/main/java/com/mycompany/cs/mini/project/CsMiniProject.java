@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 
 public class CsMiniProject extends JFrame {
     public CsMiniProject() {
-        setTitle("SkillHub - Workshop Management System");
+        setTitle("Workshop Management System");
         setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -35,8 +35,11 @@ public class CsMiniProject extends JFrame {
 }
 
 class EmployeePanel extends JFrame {
-    private JTextField nameField, deptField, emailField;
-    private JButton saveButton;
+
+    private final JTextField nameField;
+    private final JTextField deptField;
+    private final JTextField emailField;
+    private final JButton saveButton;
 
     public EmployeePanel() {
         setTitle("Add Employee");
@@ -73,16 +76,17 @@ class EmployeePanel extends JFrame {
             return;
         }
         
-        // Call your existing write function here
+        // Put read/write func here teju
         JOptionPane.showMessageDialog(this, "Employee saved successfully!");
         dispose();
     }
 }
 
 class FacilitatorPanel extends JFrame {
-    private JTextField nameField, emailField;
-    private JComboBox<String> expertiseBox;
-    private JButton saveButton;
+    private final JTextField nameField;
+    private final JTextField emailField;
+    private final JComboBox<String> expertiseBox;
+    private final JButton saveButton;
 
     public FacilitatorPanel() {
         setTitle("Add Facilitator");
@@ -112,7 +116,6 @@ class FacilitatorPanel extends JFrame {
 
     private void saveFacilitator() {
         String name = nameField.getText().trim();
-        String expertise = (String) expertiseBox.getSelectedItem();
         String email = emailField.getText().trim();
         
         if (name.isEmpty() || email.isEmpty()) {
@@ -120,7 +123,7 @@ class FacilitatorPanel extends JFrame {
             return;
         }
         
-        // Call your existing write function here
+        // Put read/write function here teju
         JOptionPane.showMessageDialog(this, "Facilitator saved successfully!");
         dispose();
     }
