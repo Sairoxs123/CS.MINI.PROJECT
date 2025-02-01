@@ -96,9 +96,8 @@ class EmployeePanel extends JFrame {
             return;
         }
 
-        // Put read/write func here teju
+        // Put read/write func here
         JOptionPane.showMessageDialog(this, "Employee saved successfully!");
-        //dispose();
     }
 }
 
@@ -152,8 +151,7 @@ class FacilitatorPanel extends JFrame {
             return;
         }
 
-        // Put read/write function here teju
+        // Put read/write function here
         JOptionPane.showMessageDialog(this, "Facilitator saved successfully!");
-        //dispose();
     }
 }
