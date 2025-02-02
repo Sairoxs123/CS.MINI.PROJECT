@@ -95,8 +95,7 @@ class EmployeePanel extends JFrame {
             JOptionPane.showMessageDialog(this, "An error occurred while saving the employee!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        // Put read/write func here
+        
         JOptionPane.showMessageDialog(this, "Employee saved successfully!");
     }
 }
@@ -151,7 +150,6 @@ class FacilitatorPanel extends JFrame {
             return;
         }
 
-        // Put read/write function here
         JOptionPane.showMessageDialog(this, "Facilitator saved successfully!");
     }
 }
