@@ -5,12 +5,11 @@
 package com.mycompany.cs.mini.project;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import org.apache.commons.csv.*;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 
@@ -43,6 +42,27 @@ public class CsMiniProject extends JFrame {
         }
     }
 
+    public static List<List<String>> readCSV(String filePath) throws IOException {
+        List<List<String>> records = new ArrayList<>();
+        try (CSVParser csvParser = CSVParser.parse(filePath, CSVFormat.DEFAULT)) {
+            for (CSVRecord csvRecord : csvParser) {
+                List<String> record = new ArrayList<>();
+                for (String field : csvRecord) {
+                    record.add(field);
+                }
+                records.add(record);
+            }
+            return records;
+        }
+    }
+
+    public static void loadIds(String filePath, List<Integer> ids) throws IOException {
+        List<List<String>> records = readCSV(filePath);
+        for (int i = 1; i < records.size(); i++) {
+            ids.add(Integer.parseInt(records.get(i).get(0)));
+        }
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new CsMiniProject().setVisible(true));
     }
@@ -54,7 +74,7 @@ class EmployeePanel extends JFrame {
     private final JTextField deptField;
     private final JTextField emailField;
     private final JButton saveButton;
-    private static final HashSet<Integer> employeeIds = new HashSet<>();
+    private static final List<Integer> employeeIds = new ArrayList<>();
 
     public EmployeePanel() {
         setTitle("Add Employee");
@@ -82,6 +102,11 @@ class EmployeePanel extends JFrame {
     }
 
     private void saveEmployee() {
+        try {
+            CsMiniProject.loadIds("employees.csv", employeeIds);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "An error occurred while loading employee IDs!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
         String name = nameField.getText().trim();
         String dept = deptField.getText().trim();
         String email = emailField.getText().trim();
@@ -90,21 +115,21 @@ class EmployeePanel extends JFrame {
             JOptionPane.showMessageDialog(this, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
+
         int idE = generateUniqueID(employeeIds);
         String eID = Integer.toString(idE);
 
-        String[] data = {name, dept, email, eID};
+        String[] data = {eID, name, dept, email};
         try {
             CsMiniProject.appendToCSV("employees.csv", data);
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this, "An error occurred while saving the employee!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
+
         JOptionPane.showMessageDialog(this, "Employee saved successfully! ID: "+ idE);
     }
-    private int generateUniqueID(HashSet<Integer> existingIds) {
+    private int generateUniqueID(List<Integer> existingIds) {
         Random random = new Random();
         int id;
         do {
@@ -120,7 +145,7 @@ class FacilitatorPanel extends JFrame {
     private final JTextField emailField;
     private final JComboBox<String> expertiseBox;
     private final JButton saveButton;
-    private static final HashSet<Integer> facilitatorIds = new HashSet<>();
+    private static final List<Integer> facilitatorIds = new ArrayList<Integer>();
 
     public FacilitatorPanel() {
         setTitle("Add Facilitator");
@@ -149,6 +174,11 @@ class FacilitatorPanel extends JFrame {
     }
 
     private void saveFacilitator() {
+        try {
+            CsMiniProject.loadIds("facilitators.csv", facilitatorIds);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "An error occurred while loading employee IDs!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
         String name = nameField.getText().trim();
         String email = emailField.getText().trim();
         String expertise = (String) expertiseBox.getSelectedItem();
@@ -160,7 +190,7 @@ class FacilitatorPanel extends JFrame {
         int idF = generateUniqueID(facilitatorIds);
         String fID = Integer.toString(idF);
 
-        String[] data = {name, expertise, email, fID};
+        String[] data = {fID, name, expertise, email};
         try {
             CsMiniProject.appendToCSV("facilitators.csv", data);
         } catch (IOException ex) {
@@ -170,7 +200,7 @@ class FacilitatorPanel extends JFrame {
 
         JOptionPane.showMessageDialog(this, "Facilitator saved successfully! ID: "+fID);
     }
-    private int generateUniqueID(HashSet<Integer> existingIds) {
+    private int generateUniqueID(List<Integer> existingIds) {
         Random random = new Random();
         int id;
         do {
