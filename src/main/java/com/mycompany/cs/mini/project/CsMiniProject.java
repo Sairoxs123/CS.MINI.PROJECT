@@ -10,6 +10,8 @@ import java.awt.event.ActionListener;
 import org.apache.commons.csv.*;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Random;
 
 
 public class CsMiniProject extends JFrame {
@@ -34,10 +36,10 @@ public class CsMiniProject extends JFrame {
     }
 
     public static void appendToCSV(String filePath, String[] data) throws IOException {
-        try (FileWriter fileWriter = new FileWriter(filePath, true); // Append mode (true)
+        try (FileWriter fileWriter = new FileWriter(filePath, true);
             CSVPrinter csvPrinter = new CSVPrinter(fileWriter, CSVFormat.DEFAULT)) {
             csvPrinter.println();
-            csvPrinter.printRecord((Object[]) data); // This already adds a new line
+            csvPrinter.printRecord((Object[]) data);
         }
     }
 
@@ -52,6 +54,7 @@ class EmployeePanel extends JFrame {
     private final JTextField deptField;
     private final JTextField emailField;
     private final JButton saveButton;
+    private static final HashSet<Integer> employeeIds = new HashSet<>();
 
     public EmployeePanel() {
         setTitle("Add Employee");
@@ -87,8 +90,11 @@ class EmployeePanel extends JFrame {
             JOptionPane.showMessageDialog(this, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        
+        int idE = generateUniqueID(employeeIds);
+        String eID = Integer.toString(idE);
 
-        String[] data = {name, dept, email};
+        String[] data = {name, dept, email, eID};
         try {
             CsMiniProject.appendToCSV("employees.csv", data);
         } catch (IOException ex) {
@@ -96,7 +102,16 @@ class EmployeePanel extends JFrame {
             return;
         }
         
-        JOptionPane.showMessageDialog(this, "Employee saved successfully!");
+        JOptionPane.showMessageDialog(this, "Employee saved successfully! ID: "+ idE);
+    }
+    private int generateUniqueID(HashSet<Integer> existingIds) {
+        Random random = new Random();
+        int id;
+        do {
+            id = 1000 + random.nextInt(9000); // Generate 4-digit ID
+        } while (existingIds.contains(id));
+        existingIds.add(id);
+        return id;
     }
 }
 
@@ -105,6 +120,7 @@ class FacilitatorPanel extends JFrame {
     private final JTextField emailField;
     private final JComboBox<String> expertiseBox;
     private final JButton saveButton;
+    private static final HashSet<Integer> facilitatorIds = new HashSet<>();
 
     public FacilitatorPanel() {
         setTitle("Add Facilitator");
@@ -141,8 +157,10 @@ class FacilitatorPanel extends JFrame {
             JOptionPane.showMessageDialog(this, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        int idF = generateUniqueID(facilitatorIds);
+        String fID = Integer.toString(idF);
 
-        String[] data = {name, expertise, email};
+        String[] data = {name, expertise, email, fID};
         try {
             CsMiniProject.appendToCSV("facilitators.csv", data);
         } catch (IOException ex) {
@@ -150,6 +168,15 @@ class FacilitatorPanel extends JFrame {
             return;
         }
 
-        JOptionPane.showMessageDialog(this, "Facilitator saved successfully!");
+        JOptionPane.showMessageDialog(this, "Facilitator saved successfully! ID: "+fID);
+    }
+    private int generateUniqueID(HashSet<Integer> existingIds) {
+        Random random = new Random();
+        int id;
+        do {
+            id = 1000 + random.nextInt(9000); // Generate 4-digit ID
+        } while (existingIds.contains(id));
+        existingIds.add(id);
+        return id;
     }
 }
