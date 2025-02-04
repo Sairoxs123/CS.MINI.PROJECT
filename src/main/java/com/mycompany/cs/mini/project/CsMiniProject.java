@@ -117,7 +117,7 @@ class EmployeePanel extends JFrame {
         }
 
         int idE = generateUniqueID(employeeIds);
-        String eID = Integer.toString(idE);
+        String eID = "E"+Integer.toString(idE);
 
         String[] data = {eID, name, dept, email};
         try {
@@ -127,13 +127,13 @@ class EmployeePanel extends JFrame {
             return;
         }
 
-        JOptionPane.showMessageDialog(this, "Employee saved successfully! ID: "+ idE);
+        JOptionPane.showMessageDialog(this, "Employee saved successfully! ID: E"+ idE);
     }
     private int generateUniqueID(List<Integer> existingIds) {
         Random random = new Random();
         int id;
         do {
-            id = 1000 + random.nextInt(9000); // Generate 4-digit ID
+            id = 1000 + random.nextInt(9000);
         } while (existingIds.contains(id));
         existingIds.add(id);
         return id;
@@ -188,7 +188,7 @@ class FacilitatorPanel extends JFrame {
             return;
         }
         int idF = generateUniqueID(facilitatorIds);
-        String fID = Integer.toString(idF);
+        String fID = "F"+Integer.toString(idF);
 
         String[] data = {fID, name, expertise, email};
         try {
@@ -204,7 +204,7 @@ class FacilitatorPanel extends JFrame {
         Random random = new Random();
         int id;
         do {
-            id = 1000 + random.nextInt(9000); // Generate 4-digit ID
+            id = 1000 + random.nextInt(9000);
         } while (existingIds.contains(id));
         existingIds.add(id);
         return id;
