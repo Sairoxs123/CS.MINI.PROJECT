@@ -226,6 +226,8 @@ class FacilitatorPanel extends JFrame {
 class WorkshopPanel extends JFrame {
     private final JTextField titleField;
     private final JComboBox<String> facilitatorBox, locationBox;
+    private List<String> facilitators = new ArrayList<>();
+    private List<String> facilitatorIDs = new ArrayList<>();
     private final JRadioButton morning, afternoon, fullDay;
     private final JButton saveButton;
     private static final List<String> workshopIds = new ArrayList<>();
@@ -248,17 +250,18 @@ class WorkshopPanel extends JFrame {
 
         gbc.gridx = 0;
         gbc.gridy = 1;
-        add(new JLabel("Facilitator Name:"), gbc);
+        add(new JLabel("Facilitator ID:"), gbc);
 
         gbc.gridx = 1;
-        List<String> facilitators = new ArrayList<>();
+
+
         try {
-            loadFacilitatorNames("facilitators.csv", facilitators);
+            loadFacilitatorIDs("facilitators.csv", facilitators, facilitatorIDs);
         } catch (IOException | CsvException e) {
             JOptionPane.showMessageDialog(this, "An error occurred while loading facilitators!", "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
-        facilitatorBox = new JComboBox<>(facilitators.toArray(new String[0]));
+        facilitatorBox = new JComboBox<>(facilitatorIDs.toArray(new String[0]));
         add(facilitatorBox, gbc);
 
         gbc.gridx = 0;
@@ -297,28 +300,31 @@ class WorkshopPanel extends JFrame {
         saveButton.addActionListener(e -> saveWorkshop());
     }
 
-    private static void loadFacilitatorNames(String filePath, List<String> facilitators) throws IOException, CsvException {
+    private static void loadFacilitatorIDs(String filePath, List<String> facilitators, List<String> facilitatorsIds) throws IOException, CsvException {
         List<List<String>> records = CsMiniProject.readCSV(filePath);
         for (int i = 1; i < records.size(); i++) {
             facilitators.add(records.get(i).get(1));
+            facilitatorsIds.add(records.get(i).get(0));
         }
     }
 
     private void saveWorkshop() {
         String title = titleField.getText().trim();
-        String facilitatorName = (String) facilitatorBox.getSelectedItem();
+        String facilitatorID = (String) facilitatorBox.getSelectedItem();
+        int facilitatorIndex = facilitatorBox.getSelectedIndex();
+        String facilitatorName = facilitators.get(facilitatorIndex);
         String location = (String) locationBox.getSelectedItem();
         String timing = morning.isSelected() ? "Morning" : afternoon.isSelected() ? "Afternoon" : "Full Day";
         CsMiniProject project = new CsMiniProject();
         int idW = project.generateUniqueID(workshopIds);
         String WID = "F" + Integer.toString(idW);
 
-        if (title.isEmpty() || facilitatorName == null || location == null || timing.isEmpty()) {
+        if (title.isEmpty() || facilitatorID == null || location == null || timing.isEmpty()) {
             JOptionPane.showMessageDialog(this, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        String[] data = { WID, title, facilitatorName, location, timing };
+        String[] data = { WID, title, facilitatorID, facilitatorName, location, timing };
         try {
             CsMiniProject.appendToCSV("workshops.csv", data);
             JOptionPane.showMessageDialog(this, "Workshop saved successfully!");
