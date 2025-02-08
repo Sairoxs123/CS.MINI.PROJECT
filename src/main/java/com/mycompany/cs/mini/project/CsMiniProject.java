@@ -3,9 +3,15 @@ package com.mycompany.cs.mini.project;
 import javax.swing.*;
 import java.awt.*;
 import org.apache.commons.csv.*;
+
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
+
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -35,42 +41,49 @@ public class CsMiniProject extends JFrame {
 
         addFacilitatorItem.addActionListener(e -> {
             FacilitatorPanel facilitatorPanel = new FacilitatorPanel();
-            facilitatorPanel.setVisible(true); 
+            facilitatorPanel.setVisible(true);
         });
 
         addWorkshopItem.addActionListener(e -> {
             WorkshopPanel workshopPanel = new WorkshopPanel();
-            workshopPanel.setVisible(true); 
+            workshopPanel.setVisible(true);
         });
     }
 
     public static void appendToCSV(String filePath, String[] data) throws IOException {
         try (FileWriter fileWriter = new FileWriter(filePath, true);
-             CSVPrinter csvPrinter = new CSVPrinter(fileWriter, CSVFormat.DEFAULT)) {
+                CSVPrinter csvPrinter = new CSVPrinter(fileWriter, CSVFormat.DEFAULT)) {
             csvPrinter.println();
             csvPrinter.printRecord((Object[]) data);
         }
     }
 
-    public static List<List<String>> readCSV(String filePath) throws IOException {
-        List<List<String>> records = new ArrayList<>();
-        try (CSVParser csvParser = CSVParser.parse(filePath, CSVFormat.DEFAULT)) {
-            for (CSVRecord csvRecord : csvParser) {
-                List<String> record = new ArrayList<>();
-                for (String field : csvRecord) {
-                    record.add(field);
-                }
-                records.add(record);
+    public static List<List<String>> readCSV(String filePath) throws IOException, CsvException {
+        try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
+            List<String[]> records = reader.readAll();
+            List<List<String>> result = new ArrayList<>();
+            for (String[] record : records) {
+                result.add(Arrays.asList(record));
             }
-            return records;
+            return result;
         }
     }
 
-    public static void loadIds(String filePath, List<Integer> ids) throws IOException {
+    public static void loadIds(String filePath, List<String> ids) throws IOException, CsvException {
         List<List<String>> records = readCSV(filePath);
         for (int i = 1; i < records.size(); i++) {
-            ids.add(Integer.valueOf(records.get(i).get(0)));
+            ids.add(records.get(i).get(0));
         }
+    }
+
+    public int generateUniqueID(List<String> existingIds) {
+        Random random = new Random();
+        int id;
+        do {
+            id = 1000 + random.nextInt(9000);
+        } while (existingIds.contains(String.valueOf(id)));
+        existingIds.add(String.valueOf(id));
+        return id;
     }
 
     public static void main(String[] args) {
@@ -84,7 +97,7 @@ class EmployeePanel extends JFrame {
     private final JTextField deptField;
     private final JTextField emailField;
     private final JButton saveButton;
-    private static final List<Integer> employeeIds = new ArrayList<>();
+    private static final List<String> employeeIds = new ArrayList<>();
 
     public EmployeePanel() {
         setTitle("Add Employee");
@@ -113,8 +126,9 @@ class EmployeePanel extends JFrame {
     private void saveEmployee() {
         try {
             CsMiniProject.loadIds("employees.csv", employeeIds);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "An error occurred while loading employee IDs!", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException | CsvException e) {
+            JOptionPane.showMessageDialog(this, "An error occurred while loading employee IDs!", "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
         String name = nameField.getText().trim();
         String dept = deptField.getText().trim();
@@ -125,29 +139,22 @@ class EmployeePanel extends JFrame {
             return;
         }
 
-        int idE = generateUniqueID(employeeIds);
+        CsMiniProject project = new CsMiniProject();
+        int idE = project.generateUniqueID(employeeIds);
         String eID = "E" + Integer.toString(idE);
 
-        String[] data = {eID, name, dept, email};
+        String[] data = { eID, name, dept, email };
         try {
             CsMiniProject.appendToCSV("employees.csv", data);
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "An error occurred while saving the employee!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "An error occurred while saving the employee!", "Error",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         JOptionPane.showMessageDialog(this, "Employee saved successfully! ID: E" + idE);
     }
 
-    private int generateUniqueID(List<Integer> existingIds) {
-        Random random = new Random();
-        int id;
-        do {
-            id = 1000 + random.nextInt(9000);
-        } while (existingIds.contains(id));
-        existingIds.add(id);
-        return id;
-    }
 }
 
 class FacilitatorPanel extends JFrame {
@@ -155,7 +162,7 @@ class FacilitatorPanel extends JFrame {
     private final JTextField emailField;
     private final JComboBox<String> expertiseBox;
     private final JButton saveButton;
-    private static final List<Integer> facilitatorIds = new ArrayList<>();
+    private static final List<String> facilitatorIds = new ArrayList<>();
 
     public FacilitatorPanel() {
         setTitle("Add Facilitator");
@@ -168,7 +175,7 @@ class FacilitatorPanel extends JFrame {
         add(nameField);
 
         add(new JLabel("Expertise Area:"));
-        String[] expertiseOptions = {"Leadership", "Data Analytics", "Communication Skills"};
+        String[] expertiseOptions = { "Leadership", "Data Analytics", "Communication Skills" };
         expertiseBox = new JComboBox<>(expertiseOptions);
         add(expertiseBox);
 
@@ -185,8 +192,10 @@ class FacilitatorPanel extends JFrame {
     private void saveFacilitator() {
         try {
             CsMiniProject.loadIds("facilitators.csv", facilitatorIds);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "An error occurred while loading facilitator IDs!", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException | CsvException ex) {
+            JOptionPane.showMessageDialog(this, "An error occurred while loading facilitator IDs!", "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
         }
         String name = nameField.getText().trim();
         String email = emailField.getText().trim();
@@ -197,28 +206,20 @@ class FacilitatorPanel extends JFrame {
             return;
         }
 
-        int idF = generateUniqueID(facilitatorIds);
+        CsMiniProject project = new CsMiniProject();
+        int idF = project.generateUniqueID(facilitatorIds);
         String fID = "F" + Integer.toString(idF);
 
-        String[] data = {fID, name, expertise, email};
+        String[] data = { fID, name, expertise, email };
         try {
             CsMiniProject.appendToCSV("facilitators.csv", data);
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "An error occurred while saving the facilitator!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "An error occurred while saving the facilitator!", "Error",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         JOptionPane.showMessageDialog(this, "Facilitator saved successfully! ID: " + fID);
-    }
-
-    private int generateUniqueID(List<Integer> existingIds) {
-        Random random = new Random();
-        int id;
-        do {
-            id = 1000 + random.nextInt(9000);
-        } while (existingIds.contains(id));
-        existingIds.add(id);
-        return id;
     }
 }
 
@@ -227,7 +228,7 @@ class WorkshopPanel extends JFrame {
     private final JComboBox<String> facilitatorBox, locationBox;
     private final JRadioButton morning, afternoon, fullDay;
     private final JButton saveButton;
-    private static final List<Integer> workshopIds = new ArrayList<>();
+    private static final List<String> workshopIds = new ArrayList<>();
 
     public WorkshopPanel() {
         setTitle("Add Workshop");
@@ -247,10 +248,16 @@ class WorkshopPanel extends JFrame {
 
         gbc.gridx = 0;
         gbc.gridy = 1;
-        add(new JLabel("Facilitator ID:"), gbc);
+        add(new JLabel("Facilitator Name:"), gbc);
 
         gbc.gridx = 1;
-        List<String> facilitators = loadFacilitatorIDs("facilitators.csv");
+        List<String> facilitators = new ArrayList<>();
+        try {
+            loadFacilitatorNames("facilitators.csv", facilitators);
+        } catch (IOException | CsvException e) {
+            JOptionPane.showMessageDialog(this, "An error occurred while loading facilitators!", "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
         facilitatorBox = new JComboBox<>(facilitators.toArray(new String[0]));
         add(facilitatorBox, gbc);
 
@@ -259,7 +266,7 @@ class WorkshopPanel extends JFrame {
         add(new JLabel("Location:"), gbc);
 
         gbc.gridx = 1;
-        String[] locations = {"Boardroom", "Conference Hall", "Training Room"};
+        String[] locations = { "Boardroom", "Conference Hall", "Training Room" };
         locationBox = new JComboBox<>(locations);
         add(locationBox, gbc);
 
@@ -290,36 +297,33 @@ class WorkshopPanel extends JFrame {
         saveButton.addActionListener(e -> saveWorkshop());
     }
 
+    private static void loadFacilitatorNames(String filePath, List<String> facilitators) throws IOException, CsvException {
+        List<List<String>> records = CsMiniProject.readCSV(filePath);
+        for (int i = 1; i < records.size(); i++) {
+            facilitators.add(records.get(i).get(1));
+        }
+    }
+
     private void saveWorkshop() {
         String title = titleField.getText().trim();
-        String facilitatorID = (String) facilitatorBox.getSelectedItem();
+        String facilitatorName = (String) facilitatorBox.getSelectedItem();
         String location = (String) locationBox.getSelectedItem();
         String timing = morning.isSelected() ? "Morning" : afternoon.isSelected() ? "Afternoon" : "Full Day";
+        CsMiniProject project = new CsMiniProject();
+        int idW = project.generateUniqueID(workshopIds);
+        String WID = "F" + Integer.toString(idW);
 
-        if (title.isEmpty() || facilitatorID == null || location == null || timing.isEmpty()) {
+        if (title.isEmpty() || facilitatorName == null || location == null || timing.isEmpty()) {
             JOptionPane.showMessageDialog(this, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        String[] data = {title, facilitatorID, location, timing};
+        String[] data = { WID, title, facilitatorName, location, timing };
         try {
-            CsMiniProject.appendToCSV("workshops.txt", data);
+            CsMiniProject.appendToCSV("workshops.csv", data);
             JOptionPane.showMessageDialog(this, "Workshop saved successfully!");
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this, "Error saving workshop!", "Error", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    private List<String> loadFacilitatorIDs(String filePath) {
-        List<String> facilitatorList = new ArrayList<>();
-        try {
-            List<List<String>> records = CsMiniProject.readCSV(filePath);
-            for (List<String> record : records) {
-                facilitatorList.add(record.get(0)); // Assuming first column is ID
-            }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error loading facilitator data!", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-        return facilitatorList;
     }
 }
