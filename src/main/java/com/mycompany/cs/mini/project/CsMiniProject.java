@@ -304,11 +304,15 @@ class WorkshopPanel extends JFrame {
         List<List<String>> records = CsMiniProject.readCSV(filePath);
         List<List<String>> used = CsMiniProject.readCSV("workshops.csv");
         List<String> usedFacilitators = new ArrayList<>();
-        for (int i = 1; i < used.size(); i++) {
-            usedFacilitators.add(used.get(i).get(2));
+        for (int i = 0; i < used.size(); i++) {
+            if (i != 0 && used.get(i).size() > 0) {
+                System.err.println(used.get(i).size());
+                usedFacilitators.add(used.get(i).get(2));
+
+            }
         }
         for (int i = 1; i < records.size(); i++) {
-            if (!usedFacilitators.contains(records.get(i).get(0))) {
+            if (records.get(i).size() > 1 && !usedFacilitators.contains(records.get(i).get(0))) {
                 facilitatorsIds.add(records.get(i).get(0));
                 facilitators.add(records.get(i).get(1));
             }
