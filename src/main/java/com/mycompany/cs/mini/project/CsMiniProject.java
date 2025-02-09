@@ -328,7 +328,7 @@ class WorkshopPanel extends JFrame {
         String timing = morning.isSelected() ? "Morning" : afternoon.isSelected() ? "Afternoon" : "Full Day";
         CsMiniProject project = new CsMiniProject();
         int idW = project.generateUniqueID(workshopIds);
-        String WID = "F" + Integer.toString(idW);
+        String WID = "W" + Integer.toString(idW);
 
         if (title.isEmpty() || facilitatorID == null || location == null || timing.isEmpty()) {
             JOptionPane.showMessageDialog(this, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
