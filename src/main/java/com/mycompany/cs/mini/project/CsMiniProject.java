@@ -302,16 +302,23 @@ class WorkshopPanel extends JFrame {
 
     private static void loadFacilitatorIDs(String filePath, List<String> facilitators, List<String> facilitatorsIds) throws IOException, CsvException {
         List<List<String>> records = CsMiniProject.readCSV(filePath);
+        List<List<String>> used = CsMiniProject.readCSV("workshops.csv");
+        List<String> usedFacilitators = new ArrayList<>();
+        for (int i = 1; i < used.size(); i++) {
+            usedFacilitators.add(used.get(i).get(2));
+        }
         for (int i = 1; i < records.size(); i++) {
-            facilitators.add(records.get(i).get(1));
-            facilitatorsIds.add(records.get(i).get(0));
+            if (!usedFacilitators.contains(records.get(i).get(0))) {
+                facilitatorsIds.add(records.get(i).get(0));
+                facilitators.add(records.get(i).get(1));
+            }
         }
     }
 
     private void saveWorkshop() {
         String title = titleField.getText().trim();
         String facilitatorID = (String) facilitatorBox.getSelectedItem();
-        int facilitatorIndex = facilitatorBox.getSelectedIndex();
+        int facilitatorIndex = facilitatorIDs.indexOf(facilitatorID);
         String facilitatorName = facilitators.get(facilitatorIndex);
         String location = (String) locationBox.getSelectedItem();
         String timing = morning.isSelected() ? "Morning" : afternoon.isSelected() ? "Afternoon" : "Full Day";
