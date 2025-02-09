@@ -3,10 +3,8 @@ package com.mycompany.cs.mini.project;
 import javax.swing.*;
 import java.awt.*;
 import org.apache.commons.csv.*;
-
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
-
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,10 +25,12 @@ public class CsMiniProject extends JFrame {
         JMenuItem addEmployeeItem = new JMenuItem("Add Employee");
         JMenuItem addFacilitatorItem = new JMenuItem("Add Facilitator");
         JMenuItem addWorkshopItem = new JMenuItem("Add Workshop");
+        JMenuItem assignEmployeesItem = new JMenuItem("Assign Employees to Workshops");
 
         dataEntryMenu.add(addEmployeeItem);
         dataEntryMenu.add(addFacilitatorItem);
         dataEntryMenu.add(addWorkshopItem);
+        dataEntryMenu.add(assignEmployeesItem);
         menuBar.add(dataEntryMenu);
         setJMenuBar(menuBar);
 
@@ -47,6 +47,11 @@ public class CsMiniProject extends JFrame {
         addWorkshopItem.addActionListener(e -> {
             WorkshopPanel workshopPanel = new WorkshopPanel();
             workshopPanel.setVisible(true);
+        });
+
+        assignEmployeesItem.addActionListener(e -> {
+            WorkshopAssignmentPanel assignmentPanel = new WorkshopAssignmentPanel();
+            assignmentPanel.setVisible(true);
         });
     }
 
@@ -343,3 +348,94 @@ class WorkshopPanel extends JFrame {
         }
     }
 }
+
+class WorkshopAssignmentPanel extends JFrame {
+        JComboBox<String> workshopBox;
+        JComboBox<String> employeeBox;
+        private List<String> workshops = new ArrayList<>();
+        private List<String> employeeIds = new ArrayList<>();
+        JButton assignButton;
+
+        public WorkshopAssignmentPanel() {
+            setTitle("Assign Employees to Workshops");
+            setSize(400, 200);
+            setLocationRelativeTo(null);
+            setLayout(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(5, 5, 5, 5);
+
+            try {
+                loadWorkshopData();
+                loadEmployeeData();
+            } catch (IOException | CsvException ex) {
+                JOptionPane.showMessageDialog(this, "Error loading workshop and employee data!", "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                dispose();
+                return;
+            }
+
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            add(new JLabel("Workshop ID:"), gbc);
+
+            gbc.gridx = 1;
+            workshopBox = new JComboBox<>(workshops.toArray(new String[0]));
+            add(workshopBox, gbc);
+
+            gbc.gridx = 0;
+            gbc.gridy = 1;
+            add(new JLabel("Employee ID:"), gbc);
+
+            gbc.gridx = 1;
+            employeeBox = new JComboBox<>(employeeIds.toArray(new String[0]));
+            add(employeeBox, gbc);
+
+            gbc.gridx = 0;
+            gbc.gridy = 2;
+            gbc.gridwidth = 2;
+            assignButton = new JButton("Assign");
+            add(assignButton, gbc);
+
+            assignButton.addActionListener(e -> assignEmployee());
+        }
+
+        private void loadWorkshopData() throws IOException, CsvException {
+            List<List<String>> records = CsMiniProject.readCSV("workshops.csv");
+            workshops.clear();
+            for (int i = 1; i < records.size(); i++) {
+                if (records.get(i).size() > 0) {
+                    workshops.add(records.get(i).get(0)); // Workshop ID
+                }
+            }
+        }
+
+        private void loadEmployeeData() throws IOException, CsvException {
+            List<List<String>> records = CsMiniProject.readCSV("employees.csv");
+            employeeIds.clear();
+            for (int i = 1; i < records.size(); i++) {
+                if (records.get(i).size() > 0) {
+                    employeeIds.add(records.get(i).get(0)); // Employee ID
+                }
+            }
+        }
+
+        private void assignEmployee() {
+            String workshopId = (String) workshopBox.getSelectedItem();
+            String employeeId = (String) employeeBox.getSelectedItem();
+
+            if (workshopId == null || employeeId == null) {
+                JOptionPane.showMessageDialog(this, "Please select both workshop and employee!", "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String[] data = {workshopId, employeeId};
+            try {
+                CsMiniProject.appendToCSV("assigned_workshops.csv", data);
+                JOptionPane.showMessageDialog(this, "Assignment successful!");
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error saving assignment!", "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
