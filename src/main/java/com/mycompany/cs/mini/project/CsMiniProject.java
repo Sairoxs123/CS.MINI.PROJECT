@@ -53,7 +53,6 @@ public class CsMiniProject extends JFrame {
     public static void appendToCSV(String filePath, String[] data) throws IOException {
         try (FileWriter fileWriter = new FileWriter(filePath, true);
                 CSVPrinter csvPrinter = new CSVPrinter(fileWriter, CSVFormat.DEFAULT)) {
-            csvPrinter.println();
             csvPrinter.printRecord((Object[]) data);
         }
     }
