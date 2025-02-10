@@ -22,16 +22,22 @@ public class CsMiniProject extends JFrame {
 
         JMenuBar menuBar = new JMenuBar();
         JMenu dataEntryMenu = new JMenu("Data Entry");
+        JMenu reportMenu = new JMenu("Reports");
+        
         JMenuItem addEmployeeItem = new JMenuItem("Add Employee");
         JMenuItem addFacilitatorItem = new JMenuItem("Add Facilitator");
         JMenuItem addWorkshopItem = new JMenuItem("Add Workshop");
         JMenuItem assignEmployeesItem = new JMenuItem("Assign Employees to Workshops");
+        JMenuItem viewReportsItem = new JMenuItem("View Reports");
 
         dataEntryMenu.add(addEmployeeItem);
         dataEntryMenu.add(addFacilitatorItem);
         dataEntryMenu.add(addWorkshopItem);
         dataEntryMenu.add(assignEmployeesItem);
+        reportMenu.add(viewReportsItem);
+        
         menuBar.add(dataEntryMenu);
+        menuBar.add(reportMenu);
         setJMenuBar(menuBar);
 
         addEmployeeItem.addActionListener(e -> {
@@ -52,6 +58,11 @@ public class CsMiniProject extends JFrame {
         assignEmployeesItem.addActionListener(e -> {
             WorkshopAssignmentPanel assignmentPanel = new WorkshopAssignmentPanel();
             assignmentPanel.setVisible(true);
+        });
+        
+        viewReportsItem.addActionListener(e -> {
+            ReportPanel reportPanel = new ReportPanel();
+            reportPanel.setVisible(true);
         });
     }
 
@@ -439,3 +450,50 @@ class WorkshopAssignmentPanel extends JFrame {
             }
         }
     }
+
+class ReportPanel extends JFrame {
+    private final JTextArea reportArea;
+    
+    public ReportPanel() {
+        setTitle("Generate Reports");
+        setSize(650, 400);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
+        
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10 ,10));
+        JButton report1Button = new JButton("Employees by Workshop");
+        JButton report2Button = new JButton("Workshop Details by Employee");
+        JButton report3Button = new JButton("Employees by Time Slot");
+        
+        buttonPanel.add(report1Button);
+        buttonPanel.add(report2Button);
+        buttonPanel.add(report3Button);
+        
+        reportArea = new JTextArea();
+        reportArea.setEditable(false);
+        reportArea.setMargin(new Insets(10, 10, 10 , 10));
+        JScrollPane scrollPane = new JScrollPane(reportArea);
+
+        add(buttonPanel, BorderLayout.NORTH);
+        add(scrollPane, BorderLayout.CENTER);
+        
+        report1Button.addActionListener(e -> generateReport(1));
+        report2Button.addActionListener(e -> generateReport(2));
+        report3Button.addActionListener(e -> generateReport(3));
+    }
+    
+    private void generateReport(int reportType) {
+        // Placeholder: Replace with actual report generation logic
+        switch (reportType) {
+            case 1:
+                reportArea.setText("Report 1: Employees by Workshop\n\n[Placeholder report data]");
+                break;
+            case 2:
+                reportArea.setText("Report 2: Workshop Details by Employee\n\n[Placeholder report data]");
+                break;
+            case 3:
+                reportArea.setText("Report 3: Employees by Time Slot\n\n[Placeholder report data]");
+                break;
+        }
+    }
+}
