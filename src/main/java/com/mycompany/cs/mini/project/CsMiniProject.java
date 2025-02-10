@@ -404,7 +404,7 @@ class WorkshopAssignmentPanel extends JFrame {
             workshops.clear();
             for (int i = 1; i < records.size(); i++) {
                 if (records.get(i).size() > 0) {
-                    workshops.add(records.get(i).get(0)); // Workshop ID
+                    workshops.add(records.get(i).get(0));
                 }
             }
         }
@@ -414,7 +414,7 @@ class WorkshopAssignmentPanel extends JFrame {
             employeeIds.clear();
             for (int i = 1; i < records.size(); i++) {
                 if (records.get(i).size() > 0) {
-                    employeeIds.add(records.get(i).get(0)); // Employee ID
+                    employeeIds.add(records.get(i).get(0));
                 }
             }
         }
