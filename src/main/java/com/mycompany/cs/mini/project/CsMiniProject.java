@@ -452,48 +452,82 @@ class WorkshopAssignmentPanel extends JFrame {
     }
 
 class ReportPanel extends JFrame {
-    private final JTextArea reportArea;
+    JTextArea reportArea;
+    JComboBox<String> reportTypeBox;
+    JComboBox<String> criteriaBox;
+    JButton generateButton;
     
     public ReportPanel() {
         setTitle("Generate Reports");
-        setSize(650, 400);
+        setSize(700, 400);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-        
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10 ,10));
-        JButton report1Button = new JButton("Employees by Workshop");
-        JButton report2Button = new JButton("Workshop Details by Employee");
-        JButton report3Button = new JButton("Employees by Time Slot");
-        
-        buttonPanel.add(report1Button);
-        buttonPanel.add(report2Button);
-        buttonPanel.add(report3Button);
+
+        JPanel selectionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        reportTypeBox = new JComboBox<>(new String[]{"Employees by Workshop", "Workshop Details by Employee", "Employees by Time Slot"});
+        criteriaBox = new JComboBox<>();
+        generateButton = new JButton("Generate Report");
+
+        selectionPanel.add(new JLabel("Select Report Type:"));
+        selectionPanel.add(reportTypeBox);
+        selectionPanel.add(new JLabel("Select Criteria:"));
+        selectionPanel.add(criteriaBox);
+        selectionPanel.add(generateButton);
         
         reportArea = new JTextArea();
         reportArea.setEditable(false);
-        reportArea.setMargin(new Insets(10, 10, 10 , 10));
+        reportArea.setMargin(new Insets(10, 10, 10, 10));
         JScrollPane scrollPane = new JScrollPane(reportArea);
 
-        add(buttonPanel, BorderLayout.NORTH);
+        add(selectionPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
         
-        report1Button.addActionListener(e -> generateReport(1));
-        report2Button.addActionListener(e -> generateReport(2));
-        report3Button.addActionListener(e -> generateReport(3));
+        reportTypeBox.addActionListener(e -> updateCriteriaOptions());
+        generateButton.addActionListener(e -> generateReport(reportTypeBox.getSelectedIndex()));
+    }
+    
+    private void updateCriteriaOptions() {
+        criteriaBox.removeAllItems();
+        int selectedIndex = reportTypeBox.getSelectedIndex();
+        List<String> options = getCriteriaOptions(selectedIndex);
+        for (String option : options) {
+            criteriaBox.addItem(option);
+        }
+    }
+    
+    private List<String> getCriteriaOptions(int reportType) {
+        List<String> options = new ArrayList<>();
+        try {
+            switch (reportType) {
+                case 0: options = readCSVColumn("workshops.csv", 0); break;
+                case 1: options = readCSVColumn("employees.csv", 0); break;
+                case 2: options.add("Morning"); options.add("Afternoon"); options.add("Full Day"); break;
+            }
+        } catch (IOException | CsvException e) {
+            JOptionPane.showMessageDialog(this, "Error loading data.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return options;
+    }
+    
+    private List<String> readCSVColumn(String filePath, int columnIndex) throws IOException, CsvException {
+        List<String> columnData = new ArrayList<>();
+        try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
+            List<String[]> records = reader.readAll();
+            for (String[] record : records) {
+                if (record.length > columnIndex) {
+                    columnData.add(record[columnIndex]);
+                }
+            }
+        }
+        return columnData;
     }
     
     private void generateReport(int reportType) {
-        // Placeholder: Replace with actual report generation logic
-        switch (reportType) {
-            case 1:
-                reportArea.setText("Report 1: Employees by Workshop\n\n[Placeholder report data]");
-                break;
-            case 2:
-                reportArea.setText("Report 2: Workshop Details by Employee\n\n[Placeholder report data]");
-                break;
-            case 3:
-                reportArea.setText("Report 3: Employees by Time Slot\n\n[Placeholder report data]");
-                break;
+        String selectedCriteria = (String) criteriaBox.getSelectedItem();
+        if (selectedCriteria == null) {
+            reportArea.setText("Please select a valid criteria.");
+            return;
         }
+        reportArea.setText("Generating Report for " + selectedCriteria + "\n\nPLACEHOLDER FOR REPORT");
     }
 }
