@@ -10,8 +10,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.StringJoiner;
 
 public class CsMiniProject extends JFrame {
     public CsMiniProject() {
@@ -23,7 +26,7 @@ public class CsMiniProject extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         JMenu dataEntryMenu = new JMenu("Data Entry");
         JMenu reportMenu = new JMenu("Reports");
-        
+
         JMenuItem addEmployeeItem = new JMenuItem("Add Employee");
         JMenuItem addFacilitatorItem = new JMenuItem("Add Facilitator");
         JMenuItem addWorkshopItem = new JMenuItem("Add Workshop");
@@ -35,7 +38,7 @@ public class CsMiniProject extends JFrame {
         dataEntryMenu.add(addWorkshopItem);
         dataEntryMenu.add(assignEmployeesItem);
         reportMenu.add(viewReportsItem);
-        
+
         menuBar.add(dataEntryMenu);
         menuBar.add(reportMenu);
         setJMenuBar(menuBar);
@@ -59,7 +62,7 @@ public class CsMiniProject extends JFrame {
             WorkshopAssignmentPanel assignmentPanel = new WorkshopAssignmentPanel();
             assignmentPanel.setVisible(true);
         });
-        
+
         viewReportsItem.addActionListener(e -> {
             ReportPanel reportPanel = new ReportPanel();
             reportPanel.setVisible(true);
@@ -269,7 +272,6 @@ class WorkshopPanel extends JFrame {
 
         gbc.gridx = 1;
 
-
         try {
             loadFacilitatorIDs("facilitators.csv", facilitators, facilitatorIDs);
         } catch (IOException | CsvException e) {
@@ -315,7 +317,8 @@ class WorkshopPanel extends JFrame {
         saveButton.addActionListener(e -> saveWorkshop());
     }
 
-    private static void loadFacilitatorIDs(String filePath, List<String> facilitators, List<String> facilitatorsIds) throws IOException, CsvException {
+    private static void loadFacilitatorIDs(String filePath, List<String> facilitators, List<String> facilitatorsIds)
+            throws IOException, CsvException {
         List<List<String>> records = CsMiniProject.readCSV(filePath);
         List<List<String>> used = CsMiniProject.readCSV("workshops.csv");
         List<String> usedFacilitators = new ArrayList<>();
@@ -361,102 +364,102 @@ class WorkshopPanel extends JFrame {
 }
 
 class WorkshopAssignmentPanel extends JFrame {
-        JComboBox<String> workshopBox;
-        JComboBox<String> employeeBox;
-        private List<String> workshops = new ArrayList<>();
-        private List<String> employeeIds = new ArrayList<>();
-        JButton assignButton;
+    JComboBox<String> workshopBox;
+    JComboBox<String> employeeBox;
+    private List<String> workshops = new ArrayList<>();
+    private List<String> employeeIds = new ArrayList<>();
+    JButton assignButton;
 
-        public WorkshopAssignmentPanel() {
-            setTitle("Assign Employees to Workshops");
-            setSize(400, 200);
-            setLocationRelativeTo(null);
-            setLayout(new GridBagLayout());
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(5, 5, 5, 5);
+    public WorkshopAssignmentPanel() {
+        setTitle("Assign Employees to Workshops");
+        setSize(400, 200);
+        setLocationRelativeTo(null);
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
 
-            try {
-                loadWorkshopData();
-                loadEmployeeData();
-            } catch (IOException | CsvException ex) {
-                JOptionPane.showMessageDialog(this, "Error loading workshop and employee data!", "Error",
-                        JOptionPane.ERROR_MESSAGE);
-                dispose();
-                return;
-            }
-
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            add(new JLabel("Workshop ID:"), gbc);
-
-            gbc.gridx = 1;
-            workshopBox = new JComboBox<>(workshops.toArray(new String[0]));
-            add(workshopBox, gbc);
-
-            gbc.gridx = 0;
-            gbc.gridy = 1;
-            add(new JLabel("Employee ID:"), gbc);
-
-            gbc.gridx = 1;
-            employeeBox = new JComboBox<>(employeeIds.toArray(new String[0]));
-            add(employeeBox, gbc);
-
-            gbc.gridx = 0;
-            gbc.gridy = 2;
-            gbc.gridwidth = 2;
-            assignButton = new JButton("Assign");
-            add(assignButton, gbc);
-
-            assignButton.addActionListener(e -> assignEmployee());
+        try {
+            loadWorkshopData();
+            loadEmployeeData();
+        } catch (IOException | CsvException ex) {
+            JOptionPane.showMessageDialog(this, "Error loading workshop and employee data!", "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            dispose();
+            return;
         }
 
-        private void loadWorkshopData() throws IOException, CsvException {
-            List<List<String>> records = CsMiniProject.readCSV("workshops.csv");
-            workshops.clear();
-            for (int i = 1; i < records.size(); i++) {
-                if (records.get(i).size() > 0) {
-                    workshops.add(records.get(i).get(0));
-                }
-            }
-        }
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        add(new JLabel("Workshop ID:"), gbc);
 
-        private void loadEmployeeData() throws IOException, CsvException {
-            List<List<String>> records = CsMiniProject.readCSV("employees.csv");
-            employeeIds.clear();
-            for (int i = 1; i < records.size(); i++) {
-                if (records.get(i).size() > 0) {
-                    employeeIds.add(records.get(i).get(0));
-                }
-            }
-        }
+        gbc.gridx = 1;
+        workshopBox = new JComboBox<>(workshops.toArray(new String[0]));
+        add(workshopBox, gbc);
 
-        private void assignEmployee() {
-            String workshopId = (String) workshopBox.getSelectedItem();
-            String employeeId = (String) employeeBox.getSelectedItem();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        add(new JLabel("Employee ID:"), gbc);
 
-            if (workshopId == null || employeeId == null) {
-                JOptionPane.showMessageDialog(this, "Please select both workshop and employee!", "Error",
-                        JOptionPane.ERROR_MESSAGE);
-                return;
-            }
+        gbc.gridx = 1;
+        employeeBox = new JComboBox<>(employeeIds.toArray(new String[0]));
+        add(employeeBox, gbc);
 
-            String[] data = {workshopId, employeeId};
-            try {
-                CsMiniProject.appendToCSV("assigned_workshops.csv", data);
-                JOptionPane.showMessageDialog(this, "Assignment successful!");
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "Error saving assignment!", "Error",
-                        JOptionPane.ERROR_MESSAGE);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        assignButton = new JButton("Assign");
+        add(assignButton, gbc);
+
+        assignButton.addActionListener(e -> assignEmployee());
+    }
+
+    private void loadWorkshopData() throws IOException, CsvException {
+        List<List<String>> records = CsMiniProject.readCSV("workshops.csv");
+        workshops.clear();
+        for (int i = 1; i < records.size(); i++) {
+            if (records.get(i).size() > 0) {
+                workshops.add(records.get(i).get(0));
             }
         }
     }
+
+    private void loadEmployeeData() throws IOException, CsvException {
+        List<List<String>> records = CsMiniProject.readCSV("employees.csv");
+        employeeIds.clear();
+        for (int i = 1; i < records.size(); i++) {
+            if (records.get(i).size() > 0) {
+                employeeIds.add(records.get(i).get(0));
+            }
+        }
+    }
+
+    private void assignEmployee() {
+        String workshopId = (String) workshopBox.getSelectedItem();
+        String employeeId = (String) employeeBox.getSelectedItem();
+
+        if (workshopId == null || employeeId == null) {
+            JOptionPane.showMessageDialog(this, "Please select both workshop and employee!", "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String[] data = { workshopId, employeeId };
+        try {
+            CsMiniProject.appendToCSV("assigned_workshops.csv", data);
+            JOptionPane.showMessageDialog(this, "Assignment successful!");
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Error saving assignment!", "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}
 
 class ReportPanel extends JFrame {
     JTextArea reportArea;
     JComboBox<String> reportTypeBox;
     JComboBox<String> criteriaBox;
     JButton generateButton;
-    
+
     public ReportPanel() {
         setTitle("Generate Reports");
         setSize(700, 400);
@@ -464,7 +467,8 @@ class ReportPanel extends JFrame {
         setLayout(new BorderLayout());
 
         JPanel selectionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        reportTypeBox = new JComboBox<>(new String[]{"Employees by Workshop", "Workshop Details by Employee", "Employees by Time Slot"});
+        reportTypeBox = new JComboBox<>(
+                new String[] { "Employees by Workshop", "Workshop Details by Employee", "Employees by Time Slot" });
         criteriaBox = new JComboBox<>();
         generateButton = new JButton("Generate Report");
 
@@ -473,7 +477,7 @@ class ReportPanel extends JFrame {
         selectionPanel.add(new JLabel("Select Criteria:"));
         selectionPanel.add(criteriaBox);
         selectionPanel.add(generateButton);
-        
+
         reportArea = new JTextArea();
         reportArea.setEditable(false);
         reportArea.setMargin(new Insets(10, 10, 10, 10));
@@ -481,11 +485,11 @@ class ReportPanel extends JFrame {
 
         add(selectionPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
-        
+
         reportTypeBox.addActionListener(e -> updateCriteriaOptions());
         generateButton.addActionListener(e -> generateReport(reportTypeBox.getSelectedIndex()));
     }
-    
+
     private void updateCriteriaOptions() {
         criteriaBox.removeAllItems();
         int selectedIndex = reportTypeBox.getSelectedIndex();
@@ -494,21 +498,29 @@ class ReportPanel extends JFrame {
             criteriaBox.addItem(option);
         }
     }
-    
+
     private List<String> getCriteriaOptions(int reportType) {
         List<String> options = new ArrayList<>();
         try {
             switch (reportType) {
-                case 0: options = readCSVColumn("workshops.csv", 0); break;
-                case 1: options = readCSVColumn("employees.csv", 0); break;
-                case 2: options.add("Morning"); options.add("Afternoon"); options.add("Full Day"); break;
+                case 0:
+                    options = readCSVColumn("workshops.csv", 0);
+                    break;
+                case 1:
+                    options = readCSVColumn("employees.csv", 0);
+                    break;
+                case 2:
+                    options.add("Morning");
+                    options.add("Afternoon");
+                    options.add("Full Day");
+                    break;
             }
         } catch (IOException | CsvException e) {
             JOptionPane.showMessageDialog(this, "Error loading data.", "Error", JOptionPane.ERROR_MESSAGE);
         }
         return options;
     }
-    
+
     private List<String> readCSVColumn(String filePath, int columnIndex) throws IOException, CsvException {
         List<String> columnData = new ArrayList<>();
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
@@ -521,13 +533,102 @@ class ReportPanel extends JFrame {
         }
         return columnData;
     }
-    
+
+    private static String convertMapToString(Map<String, List<String>> inputMap) {
+        StringBuilder result = new StringBuilder();
+
+        for (Map.Entry<String, List<String>> entry : inputMap.entrySet()) {
+            String key = entry.getKey();
+            List<String> values = entry.getValue();
+
+            result.append(key).append(": ");
+
+            // Use StringJoiner for a cleaner way to handle multiple values
+            StringJoiner joiner = new StringJoiner(", ");
+            for (String value : values) {
+                joiner.add(value);
+            }
+            result.append(joiner.toString());
+
+            result.append("\n"); // Add a newline for each entry
+        }
+
+        return result.toString();
+    }
+
+
     private void generateReport(int reportType) {
         String selectedCriteria = (String) criteriaBox.getSelectedItem();
         if (selectedCriteria == null) {
             reportArea.setText("Please select a valid criteria.");
             return;
         }
-        reportArea.setText("Generating Report for " + selectedCriteria + "\n\nPLACEHOLDER FOR REPORT");
+        // reportArea.setText("Generating Report for " + selectedCriteria +
+        // "\n\nPLACEHOLDER FOR REPORT");
+        try {
+            List<List<String>> workshops_assignment = CsMiniProject.readCSV("assigned_workshops.csv");
+            switch (reportType) {
+                case 0:
+                    String employees = "";
+                    for (int i = 1; i < workshops_assignment.size(); i++) {
+                        if (workshops_assignment.get(i).get(0).equals(selectedCriteria)) {
+                            employees = employees.concat(workshops_assignment.get(i).get(1) + "\n");
+                        }
+                    }
+                    if (employees.length() > 0) {
+                        reportArea.setText(employees);
+                    } else {
+                        reportArea.setText("No employees were assigned to this workshop.");
+                    }
+                    break;
+                case 1:
+                    String workshop_details = "";
+                    for (int i = 1; i < workshops_assignment.size(); i++) {
+                        if (workshops_assignment.get(i).get(1).equals(selectedCriteria)) {
+                            String wid = workshops_assignment.get(i).get(0);
+                            List<List<String>> workshops = CsMiniProject.readCSV("workshops.csv");
+                            for (int j = 1; j < workshops.size(); j++) {
+                                if (workshops.get(j).get(0).equals(wid)) {
+                                    workshop_details = "Workshop ID: " + workshops.get(j).get(0) + "\n" +
+                                            "Title: " + workshops.get(j).get(1) + "\n" +
+                                            "Facilitator ID: " + workshops.get(j).get(2) + "\n" +
+                                            "Facilitator Name: " + workshops.get(j).get(3) + "\n" +
+                                            "Location: " + workshops.get(j).get(4) + "\n" +
+                                            "Timing: " + workshops.get(j).get(5) + "\n\n";
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    if (workshop_details.length() > 0) {
+                        reportArea.setText(workshop_details);
+                    } else {
+                        reportArea.setText("This employee has not been assigned to any workshop.");
+                    }
+                case 2:
+                    List<String> filtered_workshops_ids = new ArrayList<>();
+                    List<List<String>> workshops = CsMiniProject.readCSV("workshops.csv");
+                    Map<String, List<String>> details = new HashMap<String, List<String>>();
+                    for (int i = 1; i < workshops.size(); i++) {
+                        if (workshops.get(i).get(5).equals(selectedCriteria)) {
+                            filtered_workshops_ids.add(workshops.get(i).get(0));
+                        }
+                    }
+                    for (int i = 1; i < workshops_assignment.size(); i++) {
+                        if (filtered_workshops_ids.contains(workshops_assignment.get(i).get(0))) {
+                            if (details.get(workshops_assignment.get(i).get(0)) == null) {
+                                List<String> eids = new ArrayList<>();
+                                eids.add(workshops_assignment.get(i).get(1));
+                                details.put(workshops_assignment.get(i).get(0), eids);
+                            } else {
+                                details.get(workshops_assignment.get(i).get(0)).add(workshops_assignment.get(i).get(1));
+                            }
+                        }
+                    }
+                    reportArea.setText(convertMapToString(details));
+            }
+        } catch (IOException | CsvException e) {
+            JOptionPane.showMessageDialog(this, "Error loading data.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
