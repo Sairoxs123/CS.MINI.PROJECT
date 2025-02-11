@@ -536,26 +536,19 @@ class ReportPanel extends JFrame {
 
     private static String convertMapToString(Map<String, List<String>> inputMap) {
         StringBuilder result = new StringBuilder();
-
         for (Map.Entry<String, List<String>> entry : inputMap.entrySet()) {
             String key = entry.getKey();
             List<String> values = entry.getValue();
-
             result.append(key).append(": ");
-
-            // Use StringJoiner for a cleaner way to handle multiple values
             StringJoiner joiner = new StringJoiner(", ");
             for (String value : values) {
                 joiner.add(value);
             }
             result.append(joiner.toString());
-
-            result.append("\n"); // Add a newline for each entry
+            result.append("\n");
         }
-
         return result.toString();
     }
-
 
     private void generateReport(int reportType) {
         String selectedCriteria = (String) criteriaBox.getSelectedItem();
@@ -563,69 +556,55 @@ class ReportPanel extends JFrame {
             reportArea.setText("Please select a valid criteria.");
             return;
         }
-        // reportArea.setText("Generating Report for " + selectedCriteria +
-        // "\n\nPLACEHOLDER FOR REPORT");
+
         try {
             List<List<String>> workshops_assignment = CsMiniProject.readCSV("assigned_workshops.csv");
             switch (reportType) {
                 case 0:
-                    String employees = "";
+                    StringBuilder employees = new StringBuilder();
                     for (int i = 1; i < workshops_assignment.size(); i++) {
                         if (workshops_assignment.get(i).get(0).equals(selectedCriteria)) {
-                            employees = employees.concat(workshops_assignment.get(i).get(1) + "\n");
+                            employees.append(workshops_assignment.get(i).get(1)).append("\n");
                         }
                     }
-                    if (employees.length() > 0) {
-                        reportArea.setText(employees);
-                    } else {
-                        reportArea.setText("No employees were assigned to this workshop.");
-                    }
+                    reportArea.setText(employees.length() > 0 ? employees.toString() : "No employees were assigned to this workshop.");
                     break;
                 case 1:
-                    String workshop_details = "";
+                    StringBuilder workshopDetails = new StringBuilder();
                     for (int i = 1; i < workshops_assignment.size(); i++) {
                         if (workshops_assignment.get(i).get(1).equals(selectedCriteria)) {
                             String wid = workshops_assignment.get(i).get(0);
                             List<List<String>> workshops = CsMiniProject.readCSV("workshops.csv");
-                            for (int j = 1; j < workshops.size(); j++) {
-                                if (workshops.get(j).get(0).equals(wid)) {
-                                    workshop_details = "Workshop ID: " + workshops.get(j).get(0) + "\n" +
-                                            "Title: " + workshops.get(j).get(1) + "\n" +
-                                            "Facilitator ID: " + workshops.get(j).get(2) + "\n" +
-                                            "Facilitator Name: " + workshops.get(j).get(3) + "\n" +
-                                            "Location: " + workshops.get(j).get(4) + "\n" +
-                                            "Timing: " + workshops.get(j).get(5) + "\n\n";
+                            for (List<String> workshop : workshops) {
+                                if (workshop.get(0).equals(wid)) {
+                                    workshopDetails.append("Workshop ID: ").append(workshop.get(0)).append("\n")
+                                            .append("Title: ").append(workshop.get(1)).append("\n")
+                                            .append("Facilitator ID: ").append(workshop.get(2)).append("\n")
+                                            .append("Facilitator Name: ").append(workshop.get(3)).append("\n")
+                                            .append("Location: ").append(workshop.get(4)).append("\n")
+                                            .append("Timing: ").append(workshop.get(5)).append("\n\n");
                                 }
                             }
-                            break;
                         }
                     }
-                    if (workshop_details.length() > 0) {
-                        reportArea.setText(workshop_details);
-                    } else {
-                        reportArea.setText("This employee has not been assigned to any workshop.");
-                    }
+                    reportArea.setText(workshopDetails.length() > 0 ? workshopDetails.toString() : "This employee has not been assigned to any workshop.");
+                    break;
                 case 2:
-                    List<String> filtered_workshops_ids = new ArrayList<>();
+                    List<String> filteredWorkshops = new ArrayList<>();
                     List<List<String>> workshops = CsMiniProject.readCSV("workshops.csv");
-                    Map<String, List<String>> details = new HashMap<String, List<String>>();
-                    for (int i = 1; i < workshops.size(); i++) {
-                        if (workshops.get(i).get(5).equals(selectedCriteria)) {
-                            filtered_workshops_ids.add(workshops.get(i).get(0));
+                    Map<String, List<String>> details = new HashMap<>();
+                    for (List<String> workshop : workshops) {
+                        if (workshop.get(5).equals(selectedCriteria)) {
+                            filteredWorkshops.add(workshop.get(0));
                         }
                     }
-                    for (int i = 1; i < workshops_assignment.size(); i++) {
-                        if (filtered_workshops_ids.contains(workshops_assignment.get(i).get(0))) {
-                            if (details.get(workshops_assignment.get(i).get(0)) == null) {
-                                List<String> eids = new ArrayList<>();
-                                eids.add(workshops_assignment.get(i).get(1));
-                                details.put(workshops_assignment.get(i).get(0), eids);
-                            } else {
-                                details.get(workshops_assignment.get(i).get(0)).add(workshops_assignment.get(i).get(1));
-                            }
+                    for (List<String> assignment : workshops_assignment) {
+                        if (filteredWorkshops.contains(assignment.get(0))) {
+                            details.computeIfAbsent(assignment.get(0), k -> new ArrayList<>()).add(assignment.get(1));
                         }
                     }
                     reportArea.setText(convertMapToString(details));
+                    break;
             }
         } catch (IOException | CsvException e) {
             JOptionPane.showMessageDialog(this, "Error loading data.", "Error", JOptionPane.ERROR_MESSAGE);
